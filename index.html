@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG 3: Health & Wellness Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="SDG 3 Logo.png" type="image/png">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-heart">
+                <i class="fas fa-heartbeat"></i>
+                <div class="pulse-wave"></div>
+            </div>
+            <h2>Initializing HealthSync</h2>
+            <p>Your wellness journey starts here</p>
+            <div class="loading-steps">
+                <div class="step" data-step="1">Loading health data...</div>
+                <div class="step" data-step="2">Calculating metrics...</div>
+                <div class="step" data-step="3">Preparing insights...</div>
+                <div class="step" data-step="4">Ready to go!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <i class="fas fa-heartbeat"></i>
+                <span class="logo-text">HealthSync</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Dashboard</h3>
+                <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#habits" class="nav-item" data-section="habits">
+                    <i class="fas fa-tasks"></i>
+                    <span>Daily Habits</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>Health Tracking</h3>
+                <a href="#progress" class="nav-item" data-section="progress">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="#bmi" class="nav-item" data-section="bmi">
+                    <i class="fas fa-weight"></i>
+                    <span>BMI Calculator</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>Insights</h3>
+                <a href="#insights" class="nav-item" data-section="insights">
+                    <i class="fas fa-brain"></i>
+                    <span>Health Insights</span>
+                </a>
+                <a href="#tips" class="nav-item" data-section="tips">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Daily Tips</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="theme-switcher">
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider">
+                        <i class="fas fa-sun sun-icon"></i>
+                        <i class="fas fa-moon moon-icon"></i>
+                    </span>
+                </label>
+                <span class="theme-label">Dark Mode</span>
+            </div>
+                <div>&copy; 2025 Made by Prime University</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo-title">
+                    <img src="SDG 3 Logo.png" style="border-radius: 10%;" alt="SDG 3: Good Health and Well-Being Logo" class="sdg-logo">
+                    <h1 class="page-title">Health Awareness Dashboard </h1>
+            </div>
+            <div class="top-bar-content">
+                <div class="top-bar-stats">
+                    <div class="stat-chip">
+                        <i class="fas fa-fire"></i>
+                        <span id="dailyStreak">0</span>
+                        <small>Day Streak</small>
+                    </div>
+                    <div class="stat-chip">
+                        <i class="fas fa-heart"></i>
+                        <span id="healthScore">85</span>
+                        <small>Health Score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="dashboard-grid">
+                <!-- Quick Actions -->
+                <div class="card quick-actions-card">
+                    <h2>Quick Actions</h2>
+                    <div class="quick-actions-grid">
+                        <button class="quick-btn water" onclick="addWater()">
+                            <i class="fas fa-tint"></i>
+                            <span>Add Water</span>
+                        </button>
+                        <button class="quick-btn exercise" onclick="logExercise()">
+                            <i class="fas fa-dumbbell"></i>
+                            <span>Log Exercise</span>
+                        </button>
+                        <button class="quick-btn sleep" onclick="logSleep()">
+                            <i class="fas fa-moon"></i>
+                            <span>Log Sleep</span>
+                        </button>
+                        <button class="quick-btn mood" onclick="logMood()">
+                            <i class="fas fa-smile"></i>
+                            <span>Log Mood</span>
+                        </button>
+                        <button class="quick-btn steps" onclick="addSteps()">
+                            <i class="fas fa-walking"></i>
+                            <span>Add Steps</span>
+                        </button>
+                        <button class="quick-btn bmi" onclick="showBMICalculator()">
+                            <i class="fas fa-calculator"></i>
+                            <span>BMI Check</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Today's Progress -->
+                <div class="card progress-overview">
+                    <h2>Today's Progress</h2>
+                    <div class="progress-rings">
+                        <div class="ring-container">
+                            <div class="progress-ring" data-progress="75">
+                                <div class="ring-content">
+                                    <span class="ring-value" id="waterProgress">6</span>
+                                    <span class="ring-unit">glasses</span>
+                                </div>
+                            </div>
+                            <span class="ring-label">Water</span>
+                        </div>
+                        <div class="ring-container">
+                            <div class="progress-ring" data-progress="60">
+                                <div class="ring-content">
+                                    <span class="ring-value" id="exerciseProgress">18</span>
+                                    <span class="ring-unit">min</span>
+                                </div>
+                            </div>
+                            <span class="ring-label">Exercise</span>
+                        </div>
+                        <div class="ring-container">
+                            <div class="progress-ring" data-progress="90">
+                                <div class="ring-content">
+                                    <span class="ring-value" id="sleepProgress">7.2</span>
+                                    <span class="ring-unit">hrs</span>
+                                </div>
+                            </div>
+                            <span class="ring-label">Sleep</span>
+                        </div>
+                        <div class="ring-container">
+                            <div class="progress-ring" data-progress="80">
+                                <div class="ring-content">
+                                    <span class="ring-value" id="stepsProgress">7.5k</span>
+                                    <span class="ring-unit">steps</span>
+                                </div>
+                            </div>
+                            <span class="ring-label">Steps</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Streaks -->
+                <div class="card streaks-card">
+                    <h2>Healthy Streaks</h2>
+                    <div class="streaks-list" id="streaksList">
+                        <div class="streak-item">
+                            <div class="streak-icon water">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="streak-info">
+                                <span class="streak-name">Hydration</span>
+                                <span class="streak-days" id="waterStreak">5 days</span>
+                            </div>
+                            <div class="streak-badge">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                        </div>
+                        <div class="streak-item">
+                            <div class="streak-icon exercise">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="streak-info">
+                                <span class="streak-name">Exercise</span>
+                                <span class="streak-days" id="exerciseStreak">3 days</span>
+                            </div>
+                            <div class="streak-badge">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Habits Section -->
+        <section id="habits" class="content-section">
+            <div class="section-header">
+                <h2>Daily Health Habits</h2>
+                <p>Track your daily wellness activities</p>
+            </div>
+            
+            <div class="habits-grid">
+                <!-- Hydration Card -->
+                <div class="habit-card">
+                    <div class="card-header">
+                        <div class="habit-icon water">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <h3>Hydration</h3>
+                        <span class="habit-goal">8 glasses daily</span>
+                    </div>
+                    <div class="habit-content">
+                        <div class="water-tracker">
+                            <div class="water-count">
+                                <span id="waterCount">0</span> / 8
+                            </div>
+                            <div class="water-glasses" id="waterGlasses">
+                                <!-- Water glass indicators will be generated by JS -->
+                            </div>
+                            <div class="habit-controls">
+                                <button onclick="removeWater()" class="control-btn minus">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button onclick="addWater()" class="control-btn plus">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise Card -->
+                <div class="habit-card">
+                    <div class="card-header">
+                        <div class="habit-icon exercise">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <h3>Exercise</h3>
+                        <span class="habit-goal">30 min daily</span>
+                    </div>
+                    <div class="habit-content">
+                        <div class="exercise-progress-bar">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="exerciseProgressBar" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="exerciseMinutes">0</span> / 30 minutes
+                            </div>
+                        </div>
+                        <div class="exercise-types">
+                            <button onclick="addExercise('cardio', 15)" class="exercise-type-btn">
+                                <i class="fas fa-running"></i>
+                                Cardio (15min)
+                            </button>
+                            <button onclick="addExercise('strength', 20)" class="exercise-type-btn">
+                                <i class="fas fa-dumbbell"></i>
+                                Strength (20min)
+                            </button>
+                            <button onclick="addExercise('yoga', 30)" class="exercise-type-btn">
+                                <i class="fas fa-leaf"></i>
+                                Yoga (30min)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sleep Card -->
+                <div class="habit-card">
+                    <div class="card-header">
+                        <div class="habit-icon sleep">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <h3>Sleep Goal</h3>
+                        <span class="habit-goal">8 hours nightly</span>
+                    </div>
+                    <div class="habit-content">
+                        <div class="sleep-tracker">
+                            <div class="sleep-goal-ring">
+                                <div class="sleep-ring-progress" id="sleepRingProgress"></div>
+                                <div class="sleep-ring-content">
+                                    <span id="sleepHours">7.5</span>
+                                    <small>hours</small>
+                                </div>
+                            </div>
+                            <div class="sleep-controls">
+                                <button onclick="setSleepGoal()" class="sleep-goal-btn">
+                                    <i class="fas fa-target"></i>
+                                    Set Goal
+                                </button>
+                                <button onclick="logSleep()" class="sleep-log-btn">
+                                    <i class="fas fa-plus"></i>
+                                    Log Sleep
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Steps Card -->
+                <div class="habit-card">
+                    <div class="card-header">
+                        <div class="habit-icon steps">
+                            <i class="fas fa-walking"></i>
+                        </div>
+                        <h3>Step Counter</h3>
+                        <span class="habit-goal">10,000 steps daily</span>
+                    </div>
+                    <div class="habit-content">
+                        <div class="steps-tracker">
+                            <div class="steps-count">
+                                <span id="stepsCount">0</span>
+                                <small>/ 10,000 steps</small>
+                            </div>
+                            <div class="steps-progress">
+                                <div class="steps-bar">
+                                    <div class="steps-fill" id="stepsProgressBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="steps-controls">
+                                <input type="number" id="stepsInput" placeholder="Enter steps" min="0">
+                                <button onclick="addSteps()" class="steps-add-btn">
+                                    <i class="fas fa-plus"></i>
+                                    Add Steps
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BMI Calculator Section -->
+        <section id="bmi" class="content-section">
+            <div class="section-header">
+                <h2>BMI Calculator</h2>
+                <p>Calculate your Body Mass Index</p>
+            </div>
+            
+            <div class="bmi-container">
+                <div class="card bmi-calculator">
+                    <h3>Calculate BMI</h3>
+                    <div class="bmi-form">
+                        <div class="input-group">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" id="height" placeholder="170" min="50" max="300">
+                        </div>
+                        <div class="input-group">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" id="weight" placeholder="70" min="20" max="500">
+                        </div>
+                        <button onclick="calculateBMI()" class="calculate-btn">
+                            <i class="fas fa-calculator"></i>
+                            Calculate BMI
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card bmi-result" id="bmiResult" style="display: none;">
+                    <h3>Your BMI Result</h3>
+                    <div class="bmi-display">
+                        <div class="bmi-value" id="bmiValue">0</div>
+                        <div class="bmi-category" id="bmiCategory">Normal</div>
+                    </div>
+                    <div class="bmi-chart">
+                        <div class="bmi-scale">
+                            <div class="scale-item underweight">
+                                <span>Underweight</span>
+                                <small>&lt; 18.5</small>
+                            </div>
+                            <div class="scale-item normal">
+                                <span>Normal</span>
+                                <small>18.5 - 24.9</small>
+                            </div>
+                            <div class="scale-item overweight">
+                                <span>Overweight</span>
+                                <small>25 - 29.9</small>
+                            </div>
+                            <div class="scale-item obese">
+                                <span>Obese</span>
+                                <small>&ge; 30</small>
+                            </div>
+                        </div>
+                        <div class="bmi-indicator" id="bmiIndicator"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progress" class="content-section">
+            <div class="section-header">
+                <h2>Progress Tracking</h2>
+                <p>Monitor your health journey over time</p>
+            </div>
+            
+            <div class="progress-grid">
+                <div class="card weekly-overview">
+                    <h3>Weekly Health Overview</h3>
+                    <div class="weekly-chart" id="weeklyChart">
+                        <!-- Chart will be generated by JS -->
+                    </div>
+                </div>
+                
+                <div class="card health-metrics">
+                    <h3>Health Metrics</h3>
+                    <div class="metrics-list">
+                        <div class="metric-item">
+                            <div class="metric-icon water">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-name">Hydration</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill water" id="hydrationMetric" style="width: 75%"></div>
+                                </div>
+                                <span class="metric-value">75%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon exercise">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-name">Exercise</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill exercise" id="exerciseMetric" style="width: 60%"></div>
+                                </div>
+                                <span class="metric-value">60%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon sleep">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-name">Sleep</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill sleep" id="sleepMetric" style="width: 90%"></div>
+                                </div>
+                                <span class="metric-value">90%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon steps">
+                                <i class="fas fa-walking"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-name">Steps</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill steps" id="stepsMetric" style="width: 80%"></div>
+                                </div>
+                                <span class="metric-value">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Health Insights Section -->
+        <section id="insights" class="content-section">
+            <div class="section-header">
+                <h2>Health Insights</h2>
+                <p>Personalized recommendations and achievements</p>
+            </div>
+            
+            <div class="insights-grid">
+                <div class="card achievements-card">
+                    <h3>Achievements & Badges</h3>
+                    <div class="achievements-list" id="achievementsList">
+                        <div class="achievement-item unlocked">
+                            <div class="achievement-badge">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <div class="achievement-info">
+                                <span class="achievement-name">Hydration Hero</span>
+                                <span class="achievement-desc">7-day water goal streak</span>
+                            </div>
+                        </div>
+                        <div class="achievement-item">
+                            <div class="achievement-badge locked">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="achievement-info">
+                                <span class="achievement-name">Fitness Fanatic</span>
+                                <span class="achievement-desc">30-day exercise streak</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card recommendations-card">
+                    <h3>Personalized Recommendations</h3>
+                    <div class="recommendations-list" id="recommendationsList">
+                        <div class="recommendation-item">
+                            <div class="recommendation-icon">
+                                <i class="fas fa-arrow-up text-success"></i>
+                            </div>
+                            <div class="recommendation-content">
+                                <span class="recommendation-text">Great hydration habits! Keep it up.</span>
+                            </div>
+                        </div>
+                        <div class="recommendation-item">
+                            <div class="recommendation-icon">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                            </div>
+                            <div class="recommendation-content">
+                                <span class="recommendation-text">Try adding 15 more minutes of exercise daily.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Tips Section -->
+        <section id="tips" class="content-section">
+            <div class="section-header">
+                <h2>Daily Health Tips</h2>
+                <p>Expert advice for better health</p>
+            </div>
+            
+            <div class="tips-container">
+                <div class="card tip-of-day">
+                    <div class="tip-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Tip of the Day</h3>
+                    </div>
+                    <div class="tip-content" id="dailyTip">
+                        Start your day with a glass of water to boost your metabolism and help your body wake up naturally.
+                    </div>
+                    <button onclick="getNewTip()" class="new-tip-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        New Tip
+                    </button>
+                </div>
+                
+                <div class="tips-categories">
+                    <div class="card tip-category">
+                        <div class="category-icon nutrition">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <h4>Nutrition Tips</h4>
+                        <div class="category-tips" id="nutritionTips">
+                            <p>Eat colorful fruits and vegetables to get a variety of nutrients.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card tip-category">
+                        <div class="category-icon exercise">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <h4>Exercise Tips</h4>
+                        <div class="category-tips" id="exerciseTips">
+                            <p>Take the stairs instead of the elevator for extra daily movement.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card tip-category">
+                        <div class="category-icon sleep">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <h4>Sleep Tips</h4>
+                        <div class="category-tips" id="sleepTips">
+                            <p>Keep your bedroom cool and dark for better sleep quality.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card tip-category">
+                        <div class="category-icon mental">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4>Mental Health Tips</h4>
+                        <div class="category-tips" id="mentalTips">
+                            <p>Practice deep breathing for 5 minutes to reduce stress and anxiety.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="sleepGoalModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Set Sleep Goal</h3>
+                <button class="modal-close" onclick="closeSleepGoalModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="sleepGoalInput">Sleep Goal (hours)</label>
+                    <input type="number" id="sleepGoalInput" min="4" max="12" step="0.5" value="8">
+                </div>
+                <div class="modal-actions">
+                    <button onclick="closeSleepGoalModal()" class="btn-secondary">Cancel</button>
+                    <button onclick="confirmSleepGoal()" class="btn-primary">Set Goal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
