@@ -4,7 +4,6 @@ class HealthDashboard {
         this.notifications = [];
         this.healthTips = this.initHealthTips();
         this.achievements = this.initAchievements();
-        
         this.init();
     }
 
@@ -23,61 +22,26 @@ class HealthDashboard {
         setInterval(() => {
             this.reminder();
         }, 30000);
-
     }
 
     loadData() {
         const defaultData = {
-            water: {
-                daily: 0,
-                goal: 8,
-                streak: 0
-            },
-            exercise: {
-                minutes: 0,
-                goal: 30,
-                streak: 0,
-                types: []
-            },
-            sleep: {
-                hours: 7.5,
-                goal: 8,
-                quality: 4,
-                streak: 0
-            },
-            steps: {
-                daily: 0,
-                goal: 10000,
-                streak: 0
-            },
-            mood: {
-                current: 3,
-                weekly: [3, 4, 3, 5, 4, 3, 4]
-            },
-            bmi: {
-                height: 170,
-                weight: 70,
-                value: 0,
-                category: 'Normal'
-            },
+            water: { daily: 0, goal: 8, streak: 0 },
+            exercise: { minutes: 0, goal: 30, streak: 0, types: [] },
+            sleep: { hours: 0, goal: 8, quality: 4, streak: 0 },
+            steps: { daily: 0, goal: 10000, streak: 0 },
+            mood: { current: 3, weekly: [3, 4, 3, 5, 4, 3, 4] },
+            bmi: { height: 170, weight: 70, value: 0, category: 'Normal' },
             achievements: [],
-            stats: {
-                healthScore: 85,
-                dailyStreak: 0
-            }
+            stats: { healthScore: 0, dailyStreak: 0 }
         };
 
         try {
-            const savedData = JSON.parse(localStorage.getItem('healthDashboardData') || '{}');
-            if(savedData){
-                try {
-                const parsed = JSON.parse(savedData);
-                    return { ...defaultData, ...parsed };
-                } catch (err) {
-                    console.error('Failed to parse saved dashboard data:', err);
-                    return defaultData;
-                }
+            const savedData = localStorage.getItem('healthDashboardData');
+            if (savedData) {
+                return { ...defaultData, ...JSON.parse(savedData) };
             }
+            return defaultData;
         } catch (error) {
             console.error('Error loading data:', error);
             return defaultData;
@@ -95,21 +59,13 @@ class HealthDashboard {
 
     showLoading() {
         const loadingScreen = document.getElementById('loadingScreen');
-        const steps = [
-            'Loading health data...',
-            'Calculating metrics...',
-            'Preparing insights...',
-            'Ready to go!'
-        ];
+        const steps = ['Loading health data...', 'Calculating metrics...', 'Preparing insights...', 'Ready to go!'];
 
         let currentStep = 0;
         const stepInterval = setInterval(() => {
             const stepElements = document.querySelectorAll('.step');
-            
-            // Remove active class from all steps
             stepElements.forEach(step => step.classList.remove('active'));
             
-            // Add active class to current step
             if (stepElements[currentStep]) {
                 stepElements[currentStep].classList.add('active');
             }
@@ -125,123 +81,111 @@ class HealthDashboard {
         document.getElementById('loadingScreen').classList.add('hidden');
     }
 
-setupEventListeners() {
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('change', (e) => {
-        this.toggleTheme(e.target.checked);
-    });
+    setupEventListeners() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('change', (e) => {
+                this.toggleTheme(e.target.checked);
+            });
+        }
 
-    // Desktop sidebar toggle
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            this.toggleSidebar();
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                this.toggleSidebar();
+            });
+        }
+
+        const menuToggle = document.getElementById('menuToggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleMobileSidebar();
+            });
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.getAttribute('data-section');
+                this.showSection(section);
+                this.setActiveNavItem(item);
+                
+                if (window.innerWidth <= 768) {
+                    this.closeMobileSidebar();
+                }
+            });
         });
-    }
 
-    // Mobile menu toggle
-    const menuToggle = document.getElementById('menuToggle');
-    if (menuToggle) {
-        menuToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.toggleMobileSidebar();
-        });
-    }
-
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const section = item.getAttribute('data-section');
-            this.showSection(section);
-            this.setActiveNavItem(item);
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
             
-            // Close mobile sidebar after navigation
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open') && 
+                !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                 this.closeMobileSidebar();
             }
         });
-    });
 
-    // Close sidebar when clicking outside (mobile) - FIXED VERSION
-    document.addEventListener('click', (e) => {
+        document.addEventListener('keydown', (e) => {
+            this.handleKeyboardShortcuts(e);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay') && !e.target.closest('.sidebar') && !e.target.closest('#menuToggle')) {
+                this.closeAllModals();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+    }
+
+    toggleMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        
-        if (window.innerWidth <= 768 && 
-            sidebar && sidebar.classList.contains('open') && 
-            !sidebar.contains(e.target) && 
-            !menuToggle.contains(e.target)) {
+        if (sidebar.classList.contains('open')) {
             this.closeMobileSidebar();
+        } else {
+            this.openMobileSidebar();
         }
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        this.handleKeyboardShortcuts(e);
-    });
-
-    // Modal close on overlay click (FIXED - avoid conflict)
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal-overlay') && !e.target.closest('.sidebar') && !e.target.closest('#menuToggle')) {
-            this.closeAllModals();
-        }
-    });
-
-    // Window resize handler
-    window.addEventListener('resize', () => {
-        this.handleResize();
-    });
-}
-
-// MISSING FUNCTIONS - ADD THESE:
-toggleMobileSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    
-    if (sidebar.classList.contains('open')) {
-        this.closeMobileSidebar();
-    } else {
-        this.openMobileSidebar();
     }
-}
 
-openMobileSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.add('open');
-    sidebar.classList.remove('collapsed');
-    document.body.style.overflow = 'hidden';
-}
-
-closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    if (window.innerWidth > 768) {
-        sidebar.classList.toggle('collapsed');
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    openMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.add('open');
+        sidebar.classList.remove('collapsed');
+        document.body.style.overflow = 'hidden';
     }
-}
 
-handleResize() {
-    const sidebar = document.getElementById('sidebar');
-    
-    if (window.innerWidth > 768) {
+    closeMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
         sidebar.classList.remove('open');
         document.body.style.overflow = '';
-        
-        const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        sidebar.classList.toggle('collapsed', wasCollapsed);
-    } else {
-        sidebar.classList.remove('collapsed');
     }
-}
 
-    // Theme Management
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (window.innerWidth > 768) {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    }
+
+    handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('open');
+            document.body.style.overflow = '';
+            const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            sidebar.classList.toggle('collapsed', wasCollapsed);
+        } else {
+            sidebar.classList.remove('collapsed');
+        }
+    }
+
     toggleTheme(isDark) {
         if (isDark) {
             document.body.setAttribute('data-theme', 'dark');
@@ -260,55 +204,31 @@ handleResize() {
         
         if (savedTheme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
-            themeToggle.checked = true;
+            if (themeToggle) themeToggle.checked = true;
+        }
+
+        const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && window.innerWidth > 768 && wasCollapsed) {
+            sidebar.classList.add('collapsed');
         }
     }
 
-    // Sidebar Management
-    toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('collapsed');
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-    }
-
-    toggleMobileSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar.classList.contains('open')) {
-        this.closeMobileSidebar();
-    } else {
-        this.openMobileSidebar();
-    }
-}
-
-
-    handleResize() {
-        const sidebar = document.getElementById('sidebar');
-        
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('open');
-        }
-    }
-
-    // Navigation
     showSection(sectionId) {
-        // Hide all sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
         });
         
-        // Show target section
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active');
         }
         
-        // Update page title
         const titles = {
-            dashboard: 'Health Dashboard',
-            habits: 'Daily Habits',
+            dashboard: 'Health Awareness Dashboard',
+            habits: 'Daily Health Habits',
             progress: 'Progress Tracking',
             bmi: 'BMI Calculator',
-            steps: 'Step Tracker',
             insights: 'Health Insights',
             tips: 'Daily Health Tips'
         };
@@ -326,7 +246,6 @@ handleResize() {
         activeItem.classList.add('active');
     }
 
-    // Water Management
     addWater() {
         if (this.data.water.daily < this.data.water.goal + 2) {
             this.data.water.daily++;
@@ -363,7 +282,6 @@ handleResize() {
         if (waterCount) waterCount.textContent = this.data.water.daily;
         if (waterProgress) waterProgress.textContent = this.data.water.daily;
         
-        // Update water glasses visualization
         if (waterGlasses) {
             waterGlasses.innerHTML = '';
             for (let i = 0; i < this.data.water.goal; i++) {
@@ -373,12 +291,10 @@ handleResize() {
             }
         }
         
-        // Update metrics
         const percentage = Math.min((this.data.water.daily / this.data.water.goal) * 100, 100);
         this.updateMetric('hydrationMetric', percentage);
     }
 
-    // Exercise Management
     addExercise(type, minutes) {
         this.data.exercise.minutes += minutes;
         this.data.exercise.types.push({ type, minutes, timestamp: Date.now() });
@@ -423,7 +339,6 @@ handleResize() {
         this.updateMetric('exerciseMetric', percentage);
     }
 
-    // Sleep Management
     setSleepGoal() {
         document.getElementById('sleepGoalModal').classList.add('show');
     }
@@ -449,7 +364,6 @@ handleResize() {
     }
 
     logSleep() {
-        // Simulate logging sleep hours (random between 6-9 hours)
         const sleepHours = (Math.random() * 3 + 6).toFixed(1);
         this.data.sleep.hours = parseFloat(sleepHours);
         this.updateSleepDisplay();
@@ -464,8 +378,8 @@ handleResize() {
         const sleepProgress = document.getElementById('sleepProgress');
         const sleepRingProgress = document.getElementById('sleepRingProgress');
         
-        if (sleepHours) sleepHours.textContent = this.data.sleep.hours;
-        if (sleepProgress) sleepProgress.textContent = this.data.sleep.hours;
+        if (sleepHours) sleepHours.textContent = this.data.sleep.hours.toFixed(1);
+        if (sleepProgress) sleepProgress.textContent = this.data.sleep.hours.toFixed(1);
         
         const percentage = Math.min((this.data.sleep.hours / this.data.sleep.goal) * 100, 100);
         
@@ -480,7 +394,6 @@ handleResize() {
         this.updateMetric('sleepMetric', percentage);
     }
 
-    // Steps Management
     addSteps() {
         const stepsInput = document.getElementById('stepsInput');
         const steps = parseInt(stepsInput.value);
@@ -500,7 +413,7 @@ handleResize() {
                 this.unlockAchievement('step-master');
             } else {
                 const remaining = this.data.steps.goal - this.data.steps.daily;
-                this.showNotification(`Added ${steps} steps! ${remaining} steps to goal`, 'success');
+                this.showNotification(`Added ${steps} steps! ${remaining.toLocaleString()} steps to goal`, 'success');
             }
             
             this.updateHealthScore();
@@ -530,7 +443,6 @@ handleResize() {
         this.updateMetric('stepsMetric', percentage);
     }
 
-    // BMI Calculator
     calculateBMI() {
         const heightInput = document.getElementById('height');
         const weightInput = document.getElementById('weight');
@@ -563,13 +475,11 @@ handleResize() {
         const bmiResult = document.getElementById('bmiResult');
         const bmiValue = document.getElementById('bmiValue');
         const bmiCategory = document.getElementById('bmiCategory');
-        const bmiIndicator = document.getElementById('bmiIndicator');
         
         if (bmiResult) bmiResult.style.display = 'block';
         if (bmiValue) bmiValue.textContent = this.data.bmi.value;
         if (bmiCategory) bmiCategory.textContent = this.data.bmi.category;
         
-        // Update BMI scale
         document.querySelectorAll('.scale-item').forEach(item => {
             item.classList.remove('active');
         });
@@ -584,7 +494,6 @@ handleResize() {
         this.setActiveNavItem(document.querySelector('[data-section="bmi"]'));
     }
 
-    // Mood Management
     logMood() {
         const newMood = this.data.mood.current === 5 ? 1 : this.data.mood.current + 1;
         this.setMood(newMood);
@@ -607,33 +516,22 @@ handleResize() {
         this.showNotification(`Mood updated: ${moodDescriptions[mood]}`, 'success');
     }
 
-    // Progress Rings
     updateProgressRings() {
+        const waterPercentage = (this.data.water.daily / this.data.water.goal) * 100;
+        const exercisePercentage = (this.data.exercise.minutes / this.data.exercise.goal) * 100;
+        const sleepPercentage = (this.data.sleep.hours / this.data.sleep.goal) * 100;
+        const stepsPercentage = (this.data.steps.daily / this.data.steps.goal) * 100;
+        
+        const ringPercentages = [waterPercentage, exercisePercentage, sleepPercentage, stepsPercentage];
         const rings = document.querySelectorAll('.progress-ring');
         
-        rings.forEach(ring => {
-            const waterPercentage = (this.data.water.daily / this.data.water.goal) * 100;
-            const exercisePercentage = (this.data.exercise.minutes / this.data.exercise.goal) * 100;
-            const sleepPercentage = (this.data.sleep.hours / this.data.sleep.goal) * 100;
-            const stepsPercentage = (this.data.steps.daily / this.data.steps.goal) * 100;
-            
-            // Update ring progress based on context
-            if (ring.querySelector('#waterProgress')) {
-                ring.style.setProperty('--progress', Math.min(waterPercentage, 100));
-            }
-            if (ring.querySelector('#exerciseProgress')) {
-                ring.style.setProperty('--progress', Math.min(exercisePercentage, 100));
-            }
-            if (ring.querySelector('#sleepProgress')) {
-                ring.style.setProperty('--progress', Math.min(sleepPercentage, 100));
-            }
-            if (ring.querySelector('#stepsProgress')) {
-                ring.style.setProperty('--progress', Math.min(stepsPercentage, 100));
+        rings.forEach((ring, index) => {
+            if (index < ringPercentages.length) {
+                ring.style.setProperty('--progress', Math.min(ringPercentages[index], 100));
             }
         });
     }
 
-    // Health Score Calculation
     updateHealthScore() {
         const waterScore = Math.min((this.data.water.daily / this.data.water.goal) * 100, 100);
         const exerciseScore = Math.min((this.data.exercise.minutes / this.data.exercise.goal) * 100, 100);
@@ -683,7 +581,6 @@ handleResize() {
         requestAnimationFrame(animate);
     }
 
-    // Achievements System
     initAchievements() {
         return {
             'hydration-hero': {
@@ -727,6 +624,7 @@ handleResize() {
             achievement.unlocked = true;
             this.showNotification(`Achievement Unlocked: ${achievement.name}!`, 'success');
             this.updateAchievementsDisplay();
+            this.updateRecommendations();
             this.saveData();
         }
     }
@@ -755,7 +653,88 @@ handleResize() {
         });
     }
 
-    // Health Tips System
+    updateRecommendations() {
+        const recommendationsList = document.getElementById('recommendationsList');
+        if (!recommendationsList) return;
+
+        const recommendations = [];
+
+        const waterPercentage = (this.data.water.daily / this.data.water.goal) * 100;
+        const exercisePercentage = (this.data.exercise.minutes / this.data.exercise.goal) * 100;
+        const sleepPercentage = (this.data.sleep.hours / this.data.sleep.goal) * 100;
+        const stepsPercentage = (this.data.steps.daily / this.data.steps.goal) * 100;
+
+        if (waterPercentage >= 100) {
+            recommendations.push({
+                icon: 'fas fa-arrow-up text-success',
+                text: 'Great hydration habits! Keep it up.'
+            });
+        } else if (waterPercentage < 50) {
+            recommendations.push({
+                icon: 'fas fa-exclamation-triangle text-warning',
+                text: 'Try to drink more water throughout the day.'
+            });
+        }
+
+        if (exercisePercentage >= 100) {
+            recommendations.push({
+                icon: 'fas fa-arrow-up text-success',
+                text: 'Excellent exercise routine! You\'re crushing your goals.'
+            });
+        } else if (exercisePercentage < 50) {
+            recommendations.push({
+                icon: 'fas fa-exclamation-triangle text-warning',
+                text: 'Try adding 15 more minutes of exercise daily.'
+            });
+        }
+
+        if (sleepPercentage >= 100) {
+            recommendations.push({
+                icon: 'fas fa-arrow-up text-success',
+                text: 'Perfect sleep schedule! Your body thanks you.'
+            });
+        } else if (sleepPercentage < 75) {
+            recommendations.push({
+                icon: 'fas fa-exclamation-triangle text-warning',
+                text: 'Consider getting more quality sleep for better recovery.'
+            });
+        }
+
+        if (stepsPercentage >= 100) {
+            recommendations.push({
+                icon: 'fas fa-arrow-up text-success',
+                text: 'Amazing step count! You\'re staying very active.'
+            });
+        } else if (stepsPercentage < 50) {
+            recommendations.push({
+                icon: 'fas fa-exclamation-triangle text-warning',
+                text: 'Try to take short walks throughout the day.'
+            });
+        }
+
+        if (recommendations.length === 0) {
+            recommendations.push({
+                icon: 'fas fa-info-circle',
+                text: 'Keep logging your activities to get personalized recommendations.'
+            });
+        }
+
+        recommendationsList.innerHTML = '';
+        recommendations.forEach(rec => {
+            const recElement = document.createElement('div');
+            recElement.className = 'recommendation-item';
+            recElement.innerHTML = `
+                <div class="recommendation-icon">
+                    <i class="${rec.icon}"></i>
+                </div>
+                <div class="recommendation-content">
+                    <span class="recommendation-text">${rec.text}</span>
+                </div>
+            `;
+            recommendationsList.appendChild(recElement);
+        });
+    }
+
     initHealthTips() {
         return {
             general: [
@@ -821,7 +800,6 @@ handleResize() {
         });
     }
 
-    // Weekly Chart Generation
     generateWeeklyChart() {
         const chartContainer = document.getElementById('weeklyChart');
         if (!chartContainer) return;
@@ -841,28 +819,23 @@ handleResize() {
         `;
     }
 
-    // Streak Management
     updateStreaks() {
-        // Update water streak display
         const waterStreakElement = document.getElementById('waterStreak');
         if (waterStreakElement) {
             waterStreakElement.textContent = `${this.data.water.streak} days`;
         }
         
-        // Update exercise streak display
         const exerciseStreakElement = document.getElementById('exerciseStreak');
         if (exerciseStreakElement) {
             exerciseStreakElement.textContent = `${this.data.exercise.streak} days`;
         }
         
-        // Update daily streak in top bar
         const dailyStreakElement = document.getElementById('dailyStreak');
         if (dailyStreakElement) {
             dailyStreakElement.textContent = this.data.stats.dailyStreak;
         }
     }
 
-    // Notification System
     showNotification(message, type = 'info') {
         const container = document.getElementById('notificationContainer');
         if (!container) return;
@@ -901,6 +874,8 @@ handleResize() {
     }
 
     closeNotification(notification) {
+        if (!notification || !notification.classList) return;
+        
         notification.classList.remove('show');
         setTimeout(() => {
             if (notification.parentNode) {
@@ -916,7 +891,6 @@ handleResize() {
         });
     }
 
-    // Keyboard Shortcuts
     handleKeyboardShortcuts(e) {
         if (e.ctrlKey || e.metaKey) {
             switch (e.key) {
@@ -948,7 +922,6 @@ handleResize() {
         }
     }
 
-    // Welcome notification
     showWelcomeNotification() {
         const hour = new Date().getHours();
         let greeting = 'Good morning';
@@ -958,49 +931,69 @@ handleResize() {
         this.showNotification(`${greeting}! Ready to achieve your health goals today?`, 'success');
     }
 
-    // Periodic updates
-startPeriodicUpdates() {
-    this.scheduleDailyReset();
-
-    setInterval(() => this.reminder(), 30 * 1000);
-}
-
-scheduleDailyReset() {
-    const virtualDay = 15 * 1000;
-
-    setTimeout(() => {
-        this.dailyReset();
-        setInterval(() => this.dailyReset(), virtualDay);
-    }, virtualDay);
-}
-
-dailyReset() {
-    // Update water streak (only water goal matters for global streak)
-    if (this.data.water.daily >= this.data.water.goal) {
-        this.data.water.streak++;
-        this.data.stats.dailyStreak++;
-    } else {
-        this.data.water.streak = 0;
-        this.data.stats.dailyStreak = 0;
+    startPeriodicUpdates() {
+        this.scheduleDailyReset();
+        setInterval(() => this.reminder(), 30 * 1000);
     }
 
-    // Reset daily counters
-    this.data.water.daily = 0;
-    this.data.exercise.minutes = 0;
-    this.data.sleep.hours = 0;
-    this.data.steps.daily = 0;
+    scheduleDailyReset() {
+        const virtualDay = 15 * 1000;
 
-    this.updateAllDisplays();
-    this.saveData();
-    this.showNotification('🌅 A new day has started! Resetting goals.', 'success');
-}
+        setTimeout(() => {
+            this.dailyReset();
+            setInterval(() => this.dailyReset(), virtualDay);
+        }, virtualDay);
+    }
 
+    dailyReset() {
+        if (this.data.water.daily >= this.data.water.goal) {
+            this.data.water.streak++;
+            this.data.stats.dailyStreak++;
+        } else {
+            this.data.water.streak = 0;
+            this.data.stats.dailyStreak = 0;
+        }
 
-reminder() {
-    this.showNotification('💧 Time to drink water!', 'info');
-}
+        if (this.data.exercise.minutes >= this.data.exercise.goal) {
+            this.data.exercise.streak++;
+        } else {
+            this.data.exercise.streak = 0;
+        }
 
-    // Update all displays
+        if (this.data.sleep.hours >= this.data.sleep.goal) {
+            this.data.sleep.streak++;
+        } else {
+            this.data.sleep.streak = 0;
+        }
+
+        if (this.data.steps.daily >= this.data.steps.goal) {
+            this.data.steps.streak++;
+        } else {
+            this.data.steps.streak = 0;
+        }
+
+        this.data.water.daily = 0;
+        this.data.exercise.minutes = 0;
+        this.data.exercise.types = [];
+        this.data.sleep.hours = 0;
+        this.data.steps.daily = 0;
+
+        this.data.mood.weekly.push(3);
+        if (this.data.mood.weekly.length > 7) {
+            this.data.mood.weekly = this.data.mood.weekly.slice(-7);
+        }
+
+        this.updateAllDisplays();
+        this.saveData();
+        this.showNotification('A new day has started! Resetting goals.', 'success');
+    }
+
+    reminder() {
+        if (this.data.water.daily < this.data.water.goal) {
+            this.showNotification('Time to drink water!', 'info');
+        }
+    }
+
     updateAllDisplays() {
         this.updateWaterDisplay();
         this.updateExerciseDisplay();
@@ -1010,17 +1003,16 @@ reminder() {
         this.updateHealthScore();
         this.updateStreaks();
         this.updateAchievementsDisplay();
+        this.updateRecommendations();
         this.updateTipsDisplay();
         this.generateWeeklyChart();
         
-        // Load saved BMI data
         if (this.data.bmi.value > 0) {
             this.displayBMIResult();
         }
     }
 }
 
-// Global functions for HTML onclick events
 let healthDashboard;
 
 function addWater() {
@@ -1075,14 +1067,10 @@ function getNewTip() {
     healthDashboard.getNewTip();
 }
 
-// Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     healthDashboard = new HealthDashboard();
-    const yearSpan = document.getElementById("year");
-    yearSpan.textContent = new Date().getFullYear();
 });
 
-// Handle online/offline status
 window.addEventListener('online', () => {
     if (healthDashboard) {
         healthDashboard.showNotification('Back online! Data synced.', 'success');
@@ -1095,7 +1083,6 @@ window.addEventListener('offline', () => {
     }
 });
 
-// Error handling
 window.addEventListener('error', (event) => {
     console.error('Application error:', event.error);
     if (healthDashboard) {
@@ -1103,15 +1090,8 @@ window.addEventListener('error', (event) => {
     }
 });
 
-// Visibility change handling
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && healthDashboard) {
         healthDashboard.updateAllDisplays();
     }
 });
-function updateDailyStreak(streakCount) {
-  const streakEl = document.getElementById("dailyStreak");
-  if (streakEl) {
-    streakEl.textContent = streakCount;
-  }
-}
