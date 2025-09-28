@@ -1890,3 +1890,9 @@ a:focus {
   display: flex;
   align-items: center;
 }
+
+.sidebar-footer a{
+    text-decoration: none;
+    font-weight: 700;
+    color: #1d4ed8;
+}

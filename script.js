@@ -1,4 +1,3 @@
-// Enhanced Health Dashboard JavaScript
 class HealthDashboard {
     constructor() {
         this.data = this.loadData();
@@ -9,7 +8,6 @@ class HealthDashboard {
         this.init();
     }
 
-    // Initialize the dashboard
     init() {
         this.showLoading();
         this.setupEventListeners();
@@ -28,7 +26,6 @@ class HealthDashboard {
 
     }
 
-    // Data Management
     loadData() {
         const defaultData = {
             water: {
@@ -72,7 +69,15 @@ class HealthDashboard {
 
         try {
             const savedData = JSON.parse(localStorage.getItem('healthDashboardData') || '{}');
-            return { ...defaultData, ...savedData };
+            if(savedData){
+                try {
+                const parsed = JSON.parse(savedData);
+                    return { ...defaultData, ...parsed };
+                } catch (err) {
+                    console.error('Failed to parse saved dashboard data:', err);
+                    return defaultData;
+                }
+            }
         } catch (error) {
             console.error('Error loading data:', error);
             return defaultData;
@@ -88,7 +93,6 @@ class HealthDashboard {
         }
     }
 
-    // Enhanced Loading Screen with Steps
     showLoading() {
         const loadingScreen = document.getElementById('loadingScreen');
         const steps = [
@@ -1074,6 +1078,8 @@ function getNewTip() {
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     healthDashboard = new HealthDashboard();
+    const yearSpan = document.getElementById("year");
+    yearSpan.textContent = new Date().getFullYear();
 });
 
 // Handle online/offline status
