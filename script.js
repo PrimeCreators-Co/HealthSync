@@ -18,10 +18,6 @@ class HealthDashboard {
             this.hideLoading();
             this.showWelcomeNotification();
         }, 3000);
-
-        setInterval(() => {
-            this.reminder();
-        }, 30000);
     }
 
     loadData() {
@@ -965,7 +961,7 @@ class HealthDashboard {
     }
 
     scheduleDailyReset() {
-        const virtualDay = 15 * 1000;
+        const virtualDay = 24 * 60 * 60 * 1000;
 
         setTimeout(() => {
             this.dailyReset();
