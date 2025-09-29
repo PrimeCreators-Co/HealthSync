@@ -170,17 +170,35 @@ class HealthDashboard {
         if (window.innerWidth > 768) {
             sidebar.classList.toggle('collapsed');
             localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+
+            // Update toggle icon
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const icon = sidebarToggle.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-right';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
         }
     }
 
     handleResize() {
         const sidebar = document.getElementById('sidebar');
-        
+
         if (window.innerWidth > 768) {
             sidebar.classList.remove('open');
             document.body.style.overflow = '';
             const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             sidebar.classList.toggle('collapsed', wasCollapsed);
+
+            // Update toggle icon
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const icon = sidebarToggle.querySelector('i');
+            if (wasCollapsed) {
+                icon.className = 'fas fa-chevron-right';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
         } else {
             sidebar.classList.remove('collapsed');
         }
@@ -201,7 +219,7 @@ class HealthDashboard {
     loadTheme() {
         const savedTheme = localStorage.getItem('theme');
         const themeToggle = document.getElementById('themeToggle');
-        
+
         if (savedTheme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
             if (themeToggle) themeToggle.checked = true;
@@ -211,6 +229,16 @@ class HealthDashboard {
         const sidebar = document.getElementById('sidebar');
         if (sidebar && window.innerWidth > 768 && wasCollapsed) {
             sidebar.classList.add('collapsed');
+
+            // Update toggle icon
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const icon = sidebarToggle.querySelector('i');
+            icon.className = 'fas fa-chevron-right';
+        } else if (sidebar && window.innerWidth > 768) {
+            // Ensure expanded icon
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const icon = sidebarToggle.querySelector('i');
+            icon.className = 'fas fa-bars';
         }
     }
 
